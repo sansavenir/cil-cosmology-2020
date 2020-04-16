@@ -2,7 +2,6 @@ from __future__ import print_function, division
 import os
 import torch
 import pandas as pd
-from skimage import io, transform
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
@@ -35,10 +34,11 @@ class CSVDataset(Dataset):
         img_name = os.path.join(self.root_dir,
                                 str(self.label_frame.iloc[idx, 0])+'.png')
 
+
         image = Image.open(img_name)
         label = self.label_frame.iloc[idx, 1:]
         label = np.array([label])
-        label = label.astype('float')/8.
+        label = label.astype('float')
 
         if self.transform:
             image = self.transform(image)

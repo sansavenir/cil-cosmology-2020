@@ -37,7 +37,7 @@ dataroot = "/Users/jakubkotal/Desktop/cil-cosmology-2020/data/labeled"
 workers = 2
 
 # Batch size during training
-batch_size = 64
+batch_size = 8
 
 # Number of training epochs
 num_epochs = 5
@@ -49,11 +49,11 @@ lr = 0.0002
 beta1 = 0.5
 
 # Number of GPUs available. Use 0 for CPU mode.
-ngpu = 1
+ngpu = 0
 
 # We can use an image folder dataset the way we have it setup.
 # Create the dataset
-dataset = CSVDataset('/Users/jakubkotal/Desktop/cil-cosmology-2020/data/scored.csv','/Users/jakubkotal/Desktop/cil-cosmology-2020/data/scored',
+dataset = CSVDataset('data/labeled.csv','data/labeled',
                            transform=transforms.Compose([
                                transforms.Resize(image_size),
                                transforms.CenterCrop(image_size),
@@ -88,6 +88,7 @@ def weights_init(m):
 # Create the generator
 netG = Generator(ngpu).to(device)
 
+
 # Handle multi-gpu if desired
 if (device.type == 'cuda') and (ngpu > 1):
     netG = nn.DataParallel(netG, list(range(ngpu)))
@@ -108,6 +109,7 @@ if (device.type == 'cuda') and (ngpu > 1):
 netD.apply(weights_init)
 
 # Initialize BCELoss function
+# criterion = nn.SmoothL1Loss()
 criterion = nn.BCELoss()
 
 # Create batch of latent vectors that we will use to visualize

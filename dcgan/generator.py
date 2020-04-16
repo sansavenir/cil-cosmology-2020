@@ -24,6 +24,7 @@ class Generator(nn.Module):
             nn.ConvTranspose2d( ngf * 2, ngf, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf),
             nn.ReLU(True),
+
             # state size. (ngf) x 32 x 32
             nn.ConvTranspose2d( ngf, nc, 4, 2, 1, bias=False),
             nn.Tanh()

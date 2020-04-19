@@ -17,7 +17,7 @@ function print_usage {
         echo -e "RUN_TIME\t\tRun time limit for the jupyter notebook on the cluster (HH:MM)"
         echo -e "MEM_PER_CORE\t\tMemory limit in MB per core\n"
         echo -e "Example:\n"
-        echo -e "./start_jupyter_nb.sh Euler sfux 4 01:20 2048\n"
+        echo -e "./jupyter_cluster.sh LeoOpen waenys 4 01:20 4096\n"
 }
 
 # if number of command line arguments is different from 5 or if $1==-h or $1==--help
@@ -39,7 +39,7 @@ if [ "$CLUSTERNAME" == "Euler" ]; then
     PCOMMAND="new gcc/4.8.2 r/3.6.0 python/3.6.1 eth_proxy"
 elif [ "$CLUSTERNAME" == "LeoOpen" ]; then
     CHOSTNAME="login.leonhard.ethz.ch"
-    PCOMMAND="r/3.5.1 python_cpu/3.6.4 eth_proxy"
+    PCOMMAND="r/3.5.1 python_gpu/3.7.4 eth_proxy; pip install --user --upgrade tensorflow"
 else
     echo -e "Incorrect cluster name. Please specify Euler or LeoOpen as cluster and and try again.\n"
     print_usage
@@ -106,7 +106,7 @@ if [ -f /cluster/home/$USERNAME/jnbinfo ]; then
         rm /cluster/home/$USERNAME/jnbinfo
 fi
 if [ -f /cluster/home/$USERNAME/jnbip ]; then
-	echo -e "Found old jnbip file, deleting it ..."
+    echo -e "Found old jnbip file, deleting it ..."
         rm /cluster/home/$USERNAME/jnbip
 fi 
 ENDSSH
@@ -114,8 +114,9 @@ ENDSSH
 # run the jupyter notebook job on Euler/Leonhard Open and save ip, port and the token
 # in the files jnbip and jninfo in the home directory of the user on Euler/Leonhard Open
 echo -e "Connecting to $CLUSTERNAME to start jupyter notebook in a batch job"
-ssh $USERNAME@$CHOSTNAME bsub -n $NUM_CORES -W $RUN_TIME -R "rusage[mem=$MEM_PER_CORE]"  <<ENDBSUB
+ssh $USERNAME@$CHOSTNAME bsub -n $NUM_CORES -W $RUN_TIME -R "rusage[mem=$MEM_PER_CORE]" -R "rusage[ngpus_excl_p=1]" -R "select[gpu_model0==GeForceRTX2080Ti]"  <<ENDBSUB
 module load $PCOMMAND
+pip install --user --upgrade tensorflow
 export XDG_RUNTIME_DIR=
 IP_REMOTE="\$(hostname -i)"
 echo "Remote IP:\$IP_REMOTE" >> /cluster/home/$USERNAME/jnbip
@@ -182,10 +183,10 @@ echo -e "Starting browser and connecting it to jupyter notebook"
 echo -e "Connecting to url "$nburl
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-	xdg-open $nburl
+    xdg-open $nburl
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-	open $nburl
+    open $nburl
 else
-	echo -e "Your operating system does not allow to start the browser automatically."
+    echo -e "Your operating system does not allow to start the browser automatically."
         echo -e "Please open $nburl in your browser."
 fi

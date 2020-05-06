@@ -537,7 +537,6 @@ def create_cosmology(tfrecord_dir, image_dir, shuffle):
         order = tfr.choose_shuffled_order() if shuffle else np.arange(scored.shape[0])
         for img_name, score in scored[order]:
             img_path = os.path.join(image_dir, 'scored', str(int(img_name)) + '.png')
-            print(img_path)
             img = np.asarray(PIL.Image.open(img_path))
 
             tl = img[np.newaxis, :512, :512] # HW => CHW

@@ -536,7 +536,6 @@ def create_cosmology(tfrecord_dir, image_dir):
     with TFRecordExporter(tfrecord_dir, scored.shape[0]) as tfr:
         for img_name, score in scored:
             img_path = os.path.join(image_dir, 'scored', str(int(img_name)) + '.png')
-            print(img_path)
             img = np.asarray(PIL.Image.open(img_path))
 
             tl = img[np.newaxis, :512, :512] # HW => CHW

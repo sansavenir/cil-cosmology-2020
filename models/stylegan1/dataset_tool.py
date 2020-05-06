@@ -528,6 +528,39 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
 
 #----------------------------------------------------------------------------
 
+def create_cosmology(tfrecord_dir, image_dir):
+    scored_path = os.path.join(image_dir, 'scored.csv')
+    scored = np.genfromtxt(scored_path, delimiter=',', skip_header=1, dtype=np.float32)
+
+    shape = (1, 512, 512)
+    with TFRecordExporter(tfrecord_dir, scored.shape[0]) as tfr:
+        for img_name, score in scored:
+            img_path = os.path.join(image_dir, 'scored', str(int(img_name)) + '.png')
+            print(img_path)
+            img = np.asarray(PIL.Image.open(img_path))
+
+            tl = img[np.newaxis, :512, :512] # HW => CHW
+            assert(tl.shape == shape)
+            tfr.add_image(tl)
+
+            tr = img[np.newaxis, :512, 1000-512:] # HW => CHW
+            assert(tr.shape == shape)
+            tfr.add_image(tr)
+
+            bl = img[np.newaxis, 1000-512:, :512] # HW => CHW
+            assert(bl.shape == shape)
+            tfr.add_image(bl)
+
+            br = img[np.newaxis, 1000-512:, 1000-512:] # HW => CHW
+            assert(br.shape == shape)
+            tfr.add_image(br)
+
+        scores = scored[:, 1]
+        scores = np.repeat(scores, 4, axis=0)
+        tfr.add_labels(scores)
+
+#----------------------------------------------------------------------------
+
 def create_from_hdf5(tfrecord_dir, hdf5_filename, shuffle):
     print('Loading HDF5 archive from "%s"' % hdf5_filename)
     import h5py # conda install h5py
@@ -620,11 +653,10 @@ def execute_cmdline(argv):
     p.add_argument(     '--cx',             help='Center X coordinate (default: 89)', type=int, default=89)
     p.add_argument(     '--cy',             help='Center Y coordinate (default: 121)', type=int, default=121)
 
-    p = add_command(    'create_from_images', 'Create dataset from a directory full of images.',
-                                            'create_from_images datasets/mydataset myimagedir')
+    p = add_command(    'create_cosmology', 'Create dataset from a directory full of images.',
+                                            'create_cosmology datasets/mydataset myimagedir')
     p.add_argument(     'tfrecord_dir',     help='New dataset directory to be created')
     p.add_argument(     'image_dir',        help='Directory containing the images')
-    p.add_argument(     '--shuffle',        help='Randomize image order (default: 1)', type=int, default=1)
 
     p = add_command(    'create_from_hdf5', 'Create dataset from legacy HDF5 archive.',
                                             'create_from_hdf5 datasets/celebahq ~/downloads/celeba-hq-1024x1024.h5')

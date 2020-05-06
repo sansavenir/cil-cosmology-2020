@@ -271,7 +271,7 @@ def submit_run(submit_config: SubmitConfig, run_func_name: str, **run_func_kwarg
     submit_config.run_func_kwargs = run_func_kwargs
 
     assert submit_config.submit_target == SubmitTarget.LOCAL
-    if submit_config.submit_target in {SubmitTarget.LOCAL}:
+    if submit_config.submit_target in {SubmitTarget.LOCAL} and submit_config.run_dir is None:
         run_dir = _create_run_dir_local(submit_config)
 
         submit_config.task_name = "{0}-{1:05d}-{2}".format(submit_config.user_name, submit_config.run_id, submit_config.run_desc)

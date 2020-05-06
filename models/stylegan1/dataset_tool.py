@@ -528,13 +528,14 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
 
 #----------------------------------------------------------------------------
 
-def create_cosmology(tfrecord_dir, image_dir):
+def create_cosmology(tfrecord_dir, image_dir, shuffle):
     scored_path = os.path.join(image_dir, 'scored.csv')
     scored = np.genfromtxt(scored_path, delimiter=',', skip_header=1, dtype=np.float32)
 
     shape = (1, 512, 512)
     with TFRecordExporter(tfrecord_dir, scored.shape[0]) as tfr:
-        for img_name, score in scored:
+        order = tfr.choose_shuffled_order() if shuffle else np.arange(scored.shape[0])
+        for img_name, score in scored[order]:
             img_path = os.path.join(image_dir, 'scored', str(int(img_name)) + '.png')
             print(img_path)
             img = np.asarray(PIL.Image.open(img_path))
@@ -556,7 +557,7 @@ def create_cosmology(tfrecord_dir, image_dir):
             tfr.add_image(br)
 
         scores = scored[:, 1]
-        scores = np.repeat(scores, 4, axis=0)
+        scores = np.repeat(scores, 4, axis=0)[order]
         tfr.add_labels(scores)
 
 #----------------------------------------------------------------------------
@@ -657,6 +658,7 @@ def execute_cmdline(argv):
                                             'create_cosmology datasets/mydataset myimagedir')
     p.add_argument(     'tfrecord_dir',     help='New dataset directory to be created')
     p.add_argument(     'image_dir',        help='Directory containing the images')
+    p.add_argument(     '--shuffle',        help='Randomize image order (default: 1)', type=int, default=1)
 
     p = add_command(    'create_from_hdf5', 'Create dataset from legacy HDF5 archive.',
                                             'create_from_hdf5 datasets/celebahq ~/downloads/celeba-hq-1024x1024.h5')

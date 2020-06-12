@@ -45,4 +45,3 @@ for data in tqdm(loader):
 
   np.savetxt('coords/'+str(data['name'].item())+'.csv', np.argwhere(res>0), delimiter=",")
   (Image.fromarray(img.astype(np.uint8))).save('background/'+str(data['name'].item())+'.png')
-  print(np.max(img))

@@ -1,11 +1,15 @@
 import sys
 sys.path.append('../')
+import os
 from coord_gen.generator import Generator as cg
 from image_gen.generator import Generator as ig
 import torch
 import numpy as np
 from PIL import Image
 import glob
+from scipy import stats
+
+os.makedirs('results', exist_ok=True)
 
 cg = cg(nz=10,d=50)
 cg.load_state_dict(torch.load('coord_gen/generator.pt'))
@@ -15,16 +19,13 @@ ig = ig()
 ig.load_state_dict(torch.load('image_gen/models/45_generator.pt'))
 ig.eval()
 
-backgrounds = glob.glob('background/*.png')
+pk = np.load('background.npy')
+xs = np.linspace(0, 255, 256)
+bg_rv = stats.rv_discrete(name='bg', values=(xs, pk))
 
 for i in range(10):
-  bcks = np.random.choice(backgrounds, 100)
-  res = np.zeros((1000,1000), np.uint8)
-  for (k,b) in enumerate(bcks):
-    if k%2==0:
-      res = np.maximum(res, np.asarray(Image.open(b)))
-    else:
-      res = np.minimum(res, np.asarray(Image.open(b)))
+  res = np.random.uniform(size=(1000, 1000))
+  res = bg_rv.ppf(res).astype(np.uint8)
 
   coords = (cg(torch.randn(1, 10)).detach().cpu().data.numpy().reshape([25, 2])*1000).astype(int)
 

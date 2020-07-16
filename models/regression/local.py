@@ -30,15 +30,15 @@ else:
 
 model = discriminator(64).to(device)
 
-model.load_state_dict(torch.load('/cluster/home/jkotal/cil-cosmology-2020/cgan/images9/100_model.pt', map_location=device))
+model.load_state_dict(torch.load('/cluster/home/laurinb/cil-cosmology-2020/cgan/images9/100_model.pt', map_location=device))
 model.to(device)
 
 if cuda:
-  path = '/cluster/scratch/jkotal/cil-cosmology-2020/data/'
+  path = '/cluster/scratch/laurinb/cil-cosmology-2020/data/'
 else:
   batch_size = 1
   path = '../data/'
-path = '/cluster/scratch/jkotal/cil-cosmology-2020/data/'
+path = '/cluster/scratch/laurinb/cil-cosmology-2020/data/'
 
 
 image_size = 1000
@@ -56,7 +56,7 @@ model.eval()
 best = 1000
 for i in tqdm(range(20,110)):
   model.load_state_dict(
-  torch.load('/cluster/home/jkotal/cil-cosmology-2020/cgan/images9/'+str(i)+'_model.pt', map_location=device))
+  torch.load('/cluster/home/laurinb/cil-cosmology-2020/cgan/images9/'+str(i)+'_model.pt', map_location=device))
   model.to(device)
   res, lab = None, None
   for (k,data) in enumerate(loader):

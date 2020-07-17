@@ -11,6 +11,7 @@ from discriminator import Discriminator
 from dataset import CSVDataset
 from PIL import Image
 from tqdm import tqdm
+import os
 
 nz = 100
 
@@ -20,43 +21,24 @@ manualSeed = 999
 print("Random Seed: ", manualSeed)
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
+os.makedirs('models', exist_ok=True)
+os.makedirs('results', exist_ok=True)
 
-# Root directory for dataset
-# Number of workers for dataloader
-workers = 2
-
-# Batch size during training
 batch_size = 64
-
-# Number of training epochs
 num_epochs = 50
 
-# Learning rate for optimizers
-lr = 0.000002
-
-# Beta1 hyperparam for Adam optimizers
-beta1 = 0.5
-
-# Number of GPUs available. Use 0 for CPU mode.
-ngpu = 0
-
-# We can use an image folder dataset the way we have it setup.
-# Create the dataset
 dataset = CSVDataset('../stars/',
                            transform=transforms.Compose([
                                transforms.ToTensor(),
                                transforms.Normalize([0.5],[0.5]),
                            ]))
 
-# Create the dataloader
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                          shuffle=True, num_workers=workers)
 
-# Decide which device we want to run on
-device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-# custom weights initialization called on netG and netD
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
@@ -68,39 +50,21 @@ def weights_init(m):
 
 # Create the generator
 netG = Generator().to(device)
-
-
-# Handle multi-gpu if desired
-if (device.type == 'cuda') and (ngpu > 1):
-    netG = nn.DataParallel(netG, list(range(ngpu)))
-
 netG.apply(weights_init)
-
 netD = Discriminator().to(device)
-
-if (device.type == 'cuda') and (ngpu > 1):
-    netD = nn.DataParallel(netD, list(range(ngpu)))
-
 netD.apply(weights_init)
 
 criterion = nn.BCELoss()
 
 fixed_noise = torch.randn(1, nz, 1, 1, device=device)
 
-# Setup Adam optimizers for both G and D
 optimizerG = optim.RMSprop(netG.parameters(), lr=5e-5)
 optimizerD = optim.RMSprop(netD.parameters(), lr=5e-5)
 
 fake_label = 0.
 true_label = 1.
 
-
-# Lists to keep track of progress
-img_list = []
-G_losses = []
-D_losses = []
 iters = 0
-
 print("Starting Training Loop...")
 # For each epoch
 for epoch in (range(num_epochs)):

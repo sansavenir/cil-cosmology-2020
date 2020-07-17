@@ -20,18 +20,13 @@ torch.manual_seed(manualSeed)
 workers = 2
 batch_size = 5
 num_epochs = 5
-lr = 0.000002
-beta1 = 0.5
-ngpu = 0
 dataset = CSVDataset('../coords/')
 nz = 10
 
-# Create the dataloader
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                          shuffle=True, num_workers=workers)
 
-# Decide which device we want to run on
-device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # custom weights initialization called on netG and netD
@@ -44,25 +39,13 @@ def weights_init(m):
         nn.init.constant_(m.bias.data, 0)
 
 
-# Create the generator
 netG = Generator(nz=nz, d=50).to(device)
 
-
-# Handle multi-gpu if desired
-if (device.type == 'cuda') and (ngpu > 1):
-    netG = nn.DataParallel(netG, list(range(ngpu)))
-
 netG.apply(weights_init)
-
 netD = Discriminator(d=50).to(device)
-
-if (device.type == 'cuda') and (ngpu > 1):
-    netD = nn.DataParallel(netD, list(range(ngpu)))
-
 netD.apply(weights_init)
 
 criterion = nn.BCELoss()
-
 fixed_noise = torch.randn(1, nz, device=device)
 
 # Setup Adam optimizers for both G and D

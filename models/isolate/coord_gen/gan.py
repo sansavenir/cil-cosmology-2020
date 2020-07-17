@@ -1,26 +1,12 @@
 from __future__ import print_function
 #%matplotlib inline
-import argparse
-import os
 import random
-import torch
 import torch.nn as nn
-import torch.nn.parallel
-import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
-import torchvision.datasets as dset
-import torchvision.transforms as transforms
-import torchvision.utils as vutils
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from IPython.display import HTML
 from generator import Generator
 from discriminator import Discriminator
-# from vars import nc, nz, ngf, ndf, image_size
 from dataset import CSVDataset
-from PIL import Image
 from tqdm import tqdm
 
 
@@ -80,8 +66,6 @@ criterion = nn.BCELoss()
 fixed_noise = torch.randn(1, nz, device=device)
 
 # Setup Adam optimizers for both G and D
-# optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
-# optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 optimizerG = optim.RMSprop(netG.parameters(), lr=5e-5)
 optimizerD = optim.RMSprop(netD.parameters(), lr=5e-5)
 
@@ -126,26 +110,6 @@ for epoch in tqdm(range(num_epochs)):
         errG.backward()
         D_G_z2 = output.mean().item()
         optimizerG.step()
-        # netD.zero_grad()
-        # real_cpu = data['file'].to(device).float()
-        # b_size = real_cpu.size(0)
-        # D_real = netD(real_cpu).view(-1)
-        #
-        # noise = torch.randn(b_size, nz, device=device)
-        # fake = netG(noise)
-        # D_fake = netD(fake.detach()).view(-1)
-        # D_loss = -(torch.mean(D_real) - torch.mean(D_fake))
-        # D_loss.backward()
-        # optimizerD.step()
-        # # for p in netD.parameters():
-        # #     p.data.clamp_(-0.01, 0.01)
-        #
-        # netG.zero_grad()
-        # D_fake = netD(fake).view(-1)
-        # G_loss = -torch.mean(D_fake)
-        # G_loss.backward()
-        # D_G_z2 = D_fake.mean().item()
-        # optimizerG.step()
 
         # Output training stats
         if i % 500 == 0:

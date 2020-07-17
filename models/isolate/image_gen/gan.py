@@ -88,8 +88,6 @@ criterion = nn.BCELoss()
 fixed_noise = torch.randn(1, nz, 1, 1, device=device)
 
 # Setup Adam optimizers for both G and D
-# optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
-# optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 optimizerG = optim.RMSprop(netG.parameters(), lr=5e-5)
 optimizerD = optim.RMSprop(netD.parameters(), lr=5e-5)
 
@@ -131,9 +129,6 @@ for epoch in (range(num_epochs)):
 
         # Output training stats
         if i % 300 == 0:
-            # print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
-            #       % (epoch, num_epochs, i, len(dataloader),
-            #          errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
             with torch.no_grad():
                 fixed = netG(fixed_noise).detach().cpu()
                 random = netG(torch.randn(1, nz, 1, 1, device=device)).detach().cpu()

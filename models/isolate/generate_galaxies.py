@@ -7,23 +7,32 @@ import torch
 import numpy as np
 from PIL import Image
 import glob
+from tqdm import tqdm
 from scipy import stats
+import argparse
+
+parser = argparse.ArgumentParser(description='reg')
+parser.add_argument('--coordModel', type=str, default='coord_gen/generator.pt',
+                    help='Flag indicating whether CUDA should be used')
+parser.add_argument('--starModel', type=str, default='image_gen/models/45_generator.pt',
+                    help='Flag indicating whether CUDA should be used')
+cfg = parser.parse_args()
 
 os.makedirs('results', exist_ok=True)
 
 cg = cg(nz=10,d=50)
-cg.load_state_dict(torch.load('coord_gen/generator.pt'))
+cg.load_state_dict(torch.load(cfg.coordModel))
 cg.eval()
 
 ig = ig()
-ig.load_state_dict(torch.load('image_gen/models/45_generator.pt'))
+ig.load_state_dict(torch.load(cfg.starModel))
 ig.eval()
 
 pk = np.load('background.npy')
 xs = np.linspace(0, 255, 256)
 bg_rv = stats.rv_discrete(name='bg', values=(xs, pk))
 
-for i in range(10):
+for i in tqdm(range(500)):
   res = np.random.uniform(size=(1000, 1000))
   res = bg_rv.ppf(res).astype(np.uint8)
 

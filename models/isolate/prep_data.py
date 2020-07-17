@@ -1,6 +1,5 @@
 import sys
 sys.path.append('../../')
-
 from tools.dataset import CSVDataset
 from torchvision import datasets, transforms
 import torch
@@ -9,8 +8,16 @@ import operator
 from PIL import Image
 from tqdm import tqdm
 import os
+import argparse
 
-dataset = CSVDataset('../../data/', scored=False, labeled=True, transform=
+
+
+parser = argparse.ArgumentParser(description='reg')
+parser.add_argument('--dataDir', type=str, default='/cluster/home/jkotal/cil-cosmology-2020/data/',
+                    help='Flag indicating whether CUDA should be used')
+cfg = parser.parse_args()
+
+dataset = CSVDataset(cfg.dataDir, scored=False, labeled=True, transform=
 			transforms.Compose([
  			transforms.ToTensor(),
       ]

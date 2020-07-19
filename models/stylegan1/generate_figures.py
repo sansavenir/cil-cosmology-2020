@@ -14,6 +14,7 @@ import PIL.Image
 import dnnlib
 import dnnlib.tflib as tflib
 import config
+from training import misc
 
 #----------------------------------------------------------------------------
 # Helpers for loading and using pre-trained generators.
@@ -52,6 +53,19 @@ def draw_uncurated_result_figure(png, Gs, cx, cy, cw, ch, rows, lods, seed):
             image = image.resize((cw // 2**lod, ch // 2**lod), PIL.Image.ANTIALIAS)
             canvas.paste(image, (sum(cw // 2**lod for lod in lods[:col]), row * ch // 2**lod))
     canvas.save(png)
+
+
+def draw_uncurated_result_figures(output_dir, Gs, cx, cy, cw, ch, seed, count=500):
+    print(output_dir)
+    latents = np.random.RandomState(seed).randn(count, Gs.input_shape[1])
+    images = Gs.run(latents, None, **synthesis_kwargs) # [seed, y, x, rgb]
+
+    image_iter = iter(list(images))
+    for idx, img in enumerate(image_iter):
+        im = PIL.Image.fromarray(np.squeeze(img), 'L')
+        path = os.path.join(output_dir, str(idx)+'.png')
+
+        im.save(path)
 
 #----------------------------------------------------------------------------
 # Figure 3: Style mixing.
@@ -138,20 +152,23 @@ def draw_truncation_trick_figure(png, Gs, w, h, seeds, psis):
             canvas.paste(PIL.Image.fromarray(image, 'RGB'), (col * w, row * h))
     canvas.save(png)
 
+
+
 #----------------------------------------------------------------------------
 # Main program.
 
 def main():
     tflib.init_tf()
-    os.makedirs(config.result_dir, exist_ok=True)
-    draw_uncurated_result_figure(os.path.join(config.result_dir, 'figure02-uncurated-ffhq.png'), load_Gs(url_ffhq), cx=0, cy=0, cw=1024, ch=1024, rows=3, lods=[0,1,2,2,3,3], seed=5)
-    draw_style_mixing_figure(os.path.join(config.result_dir, 'figure03-style-mixing.png'), load_Gs(url_ffhq), w=1024, h=1024, src_seeds=[639,701,687,615,2268], dst_seeds=[888,829,1898,1733,1614,845], style_ranges=[range(0,4)]*3+[range(4,8)]*2+[range(8,18)])
-    draw_noise_detail_figure(os.path.join(config.result_dir, 'figure04-noise-detail.png'), load_Gs(url_ffhq), w=1024, h=1024, num_samples=100, seeds=[1157,1012])
-    draw_noise_components_figure(os.path.join(config.result_dir, 'figure05-noise-components.png'), load_Gs(url_ffhq), w=1024, h=1024, seeds=[1967,1555], noise_ranges=[range(0, 18), range(0, 0), range(8, 18), range(0, 8)], flips=[1])
-    draw_truncation_trick_figure(os.path.join(config.result_dir, 'figure08-truncation-trick.png'), load_Gs(url_ffhq), w=1024, h=1024, seeds=[91,388], psis=[1, 0.7, 0.5, 0, -0.5, -1])
-    draw_uncurated_result_figure(os.path.join(config.result_dir, 'figure10-uncurated-bedrooms.png'), load_Gs(url_bedrooms), cx=0, cy=0, cw=256, ch=256, rows=5, lods=[0,0,1,1,2,2,2], seed=0)
-    draw_uncurated_result_figure(os.path.join(config.result_dir, 'figure11-uncurated-cars.png'), load_Gs(url_cars), cx=0, cy=64, cw=512, ch=384, rows=4, lods=[0,1,2,2,3,3], seed=2)
-    draw_uncurated_result_figure(os.path.join(config.result_dir, 'figure12-uncurated-cats.png'), load_Gs(url_cats), cx=0, cy=0, cw=256, ch=256, rows=5, lods=[0,0,1,1,2,2,2], seed=1)
+    # os.makedirs(config.result_dir, exist_ok=True)
+
+    path = '/home/lb/00003-sgan-cosmology256_t-1gpu/network-snapshot-005301.pkl'
+    network_pkl = misc.locate_network_pkl(path, path)
+    _, _, Gs = misc.load_pkl(network_pkl)
+
+    output_path = '/home/lb/figures'
+    os.makedirs(output_path, exist_ok=True)
+
+    draw_uncurated_result_figures(output_path, Gs, cx=0, cy=0, cw=1024, ch=1024, seed=5, count=1000)
 
 #----------------------------------------------------------------------------
 

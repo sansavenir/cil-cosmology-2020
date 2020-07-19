@@ -1,6 +1,5 @@
 import sys
 sys.path.append('../../')
-
 from tools.dataset import CSVDataset
 from torchvision import datasets, transforms
 import torch
@@ -8,8 +7,17 @@ import numpy as np
 import operator
 from PIL import Image
 from tqdm import tqdm
+import os
+import argparse
 
-dataset = CSVDataset('../../data/', scored=False, labeled=True, transform=
+
+
+parser = argparse.ArgumentParser(description='reg')
+parser.add_argument('--dataDir', type=str, default='/cluster/home/jkotal/cil-cosmology-2020/data/',
+                    help='Flag indicating whether CUDA should be used')
+cfg = parser.parse_args()
+
+dataset = CSVDataset(cfg.dataDir, scored=False, labeled=True, transform=
 			transforms.Compose([
  			transforms.ToTensor(),
       ]
@@ -17,6 +25,14 @@ dataset = CSVDataset('../../data/', scored=False, labeled=True, transform=
 
 loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
 filter_size = 31
+
+# bg values
+xs = np.linspace(0, 255, 256)
+bs = np.zeros_like(xs)
+
+os.makedirs('coords', exist_ok=True)
+os.makedirs('stars', exist_ok=True)
+
 for data in tqdm(loader):
   if data['label'] == 0.:
     continue
@@ -39,9 +55,17 @@ for data in tqdm(loader):
       res[i:i+filter_size, j:j+filter_size] = temp
 
   # print(np.count_nonzero(res))
+  img = img.astype(np.int32)
   for (k,a) in enumerate(np.argwhere(res>0)):
-    (Image.fromarray(img[a[0]:a[0]+30,a[1]:a[1]+30])).save('stars/'+str(data['name'].item())+'_'+str(k)+'.png')
-    img[a[0]:a[0]+30, a[1]:a[1]+30].fill(0)
+    (Image.fromarray(img[a[0]:a[0]+30,a[1]:a[1]+30].astype(np.uint8))).save('stars/'+str(data['name'].item())+'_'+str(k)+'.png')
+    img[a[0]:a[0]+30, a[1]:a[1]+30].fill(-1)
 
   np.savetxt('coords/'+str(data['name'].item())+'.csv', np.argwhere(res>0), delimiter=",")
-  (Image.fromarray(img.astype(np.uint8))).save('background/'+str(data['name'].item())+'.png')
+
+  bs_img = np.asarray([np.count_nonzero(img == x) for x in xs])
+  bs += bs_img
+
+# average background values
+bs = bs/len(dataset)
+pk = bs/np.sum(bs)
+np.save('background.npy', pk)

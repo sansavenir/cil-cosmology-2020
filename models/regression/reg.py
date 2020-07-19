@@ -3,7 +3,7 @@ from torch import nn
 import torch
 import sys
 sys.path.append('../')
-from data.dataset import CSVDataset
+from dataset import CSVDataset
 import torchvision.transforms as transforms
 import argparse
 from tqdm import tqdm
@@ -41,14 +41,14 @@ workers = 4
 validation_split = 0.2
 
 if cuda:
-  path = '/cluster/scratch/jkotal/cil-cosmology-2020/data/'
+  path = '/cluster/scratch/laurinb/cil-cosmology-2020/data/'
 else:
   batch_size = 1
   path = '../data/'
 
-# path = '/cluster/scratch/jkotal/cil-cosmology-2020/data/'
+# path = '/cluster/scratch/laurinb/cil-cosmology-2020/data/'
 
-dataset = CSVDataset(path+'scored.csv', path+'scored', transform=
+dataset = CSVDataset(path+'scored', path+'scored.csv', transform=
                        transforms.Compose([
                        # transforms.Resize(image_size),
                        # transforms.CenterCrop(image_size),
@@ -77,10 +77,10 @@ validation_loader = torch.utils.data.DataLoader(dataset, batch_size=1,
 
 
 model.to(device)
-epochs = 1
-model.train()
+epochs = 100
 tot_loss = 0
-for _ in range(epochs):
+for e in range(epochs):
+  model.train()
   with tqdm(total=len(train_loader)) as pbar:
     for (step, data) in enumerate(train_loader):
       optimizer.zero_grad()
@@ -97,15 +97,15 @@ for _ in range(epochs):
       pbar.set_description("Loss %f" % (tot_loss/((step+1))))
       pbar.update(1)
 
-model.eval()
-diff = 0
-for data in tqdm(validation_loader):
-  image = data['image'].to(device)
-  label = data['label'].view([1, -1]).to(device).float()
-  outputs = model(image)
-  diff += abs(label.item() - outputs.item())
+  model.eval()
+  diff = 0
+  for data in tqdm(validation_loader):
+    image = data['image'].to(device)
+    label = data['label'].view([1, -1]).to(device).float()
+    outputs = model(image)
+    diff += abs(label.item() - outputs.item())
 
-print(diff / len(validation_loader))
+  print('MAE epoch', str(e)+': ', diff / len(validation_loader))
 
 
 

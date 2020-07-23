@@ -70,7 +70,15 @@ def train(fs, gt, split=0.9):
 
 def main():
     paths, scores = load_scored(DATA_DIR)
-    fs = features.get_features(paths)
+
+    fs_path = os.path.join(SCRATCH_DIR, 'features.npy')
+
+    if os.path.exists(fs_path):
+        fs = np.load(fs_path)
+    else:
+        fs = features.get_features(paths)
+        np.save(fs_path, fs)
+
     model = train(fs, scores)
 
     paths, image_names = load_query(DATA_DIR)

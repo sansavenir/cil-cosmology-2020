@@ -15,8 +15,12 @@ DATA_DIR = os.path.join(SCRATCH_DIR, 'cosmology_aux_data_170429/cosmology_aux_da
 parser = argparse.ArgumentParser(description='reg')
 parser.add_argument('--data_dir', type=str, default=DATA_DIR,
                     help='Where the cosmology dataset resides')
-parser.add_argument('--pred', type=bool, default=False,
+parser.add_argument('--val', type=bool, default=True,
+                    help='Flag indicating whether to validate')
+parser.add_argument('--pred', type=bool, default=True,
                     help='Flag indicating whether to prepare a submission')
+parser.add_argument('--cached_features', type=bool, default=False,
+                    help='Flag indicating whether to use cached features')
 args = parser.parse_args()
 
 
@@ -97,7 +101,7 @@ def main():
 
     fs_path = os.path.join(args.data_dir, 'features.npy')
     ss_path = os.path.join(args.data_dir, 'scores.npy')
-    if os.path.exists(fs_path) and args.pred:
+    if os.path.exists(fs_path) and args.cached_features:
         print("Loading features from", fs_path)
         fs = np.load(fs_path)
         ss = np.load(ss_path)
@@ -106,7 +110,7 @@ def main():
         np.save(fs_path, fs)
         np.save(ss_path, ss)
 
-    split = 1 if args.pred else 0.8
+    split = 0.8 if args.val else 1
     model = train(fs, ss, split=split)
 
     if args.pred:

@@ -39,7 +39,7 @@ def get_pred_features(paths):
 def _features_for_img(img, scale_to_tile=False):
     histogram = _pixel_histogram(img)
     return histogram
-    
+
     num_stars = _num_stars(img)
     if scale_to_tile:
         num_stars /= NUM_TILES

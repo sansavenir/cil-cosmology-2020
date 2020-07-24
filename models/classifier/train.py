@@ -38,8 +38,6 @@ def load_scored(root_dir):
     np.random.shuffle(idx)
     data = data[idx]
 
-    data = data[:40]
-
     names = data[:, 0]
     scores = data[:, 1]
     paths = [os.path.join(root_dir, 'scored', str(int(n)) + '.png') for n in names]
@@ -80,6 +78,18 @@ def train(fs, gt, split=0.9):
         pred = model.predict(fs_test)
         mae = sklearn.metrics.mean_absolute_error(gt_test, pred)
         print('VALIDATION MAE:', mae)
+
+        l = range(0, 8)
+        r = range(1, 9)
+        for l, r in zip(l, r):
+            mask = (gt_test >= l) & (gt_test < r)
+            count = np.count_nonzero(mask)
+            if count == 0:
+                print('No samples in', l, '-', r)
+            else:
+                mae = sklearn.metrics.mean_absolute_error(gt_test[mask], pred[mask])
+                print('MAE of', count, 'samples in', l, '-', r, ': ', mae)
+
 
     return model
 

@@ -70,8 +70,6 @@ def train(fs, gt, split=0.9):
     #                                              scoring='neg_mean_absolute_error',
     #                                              n_jobs=-1)
 
-
-
     model.fit(fs_train, gt_train)
 
     if fs_test.shape[0] > 0:
@@ -97,8 +95,8 @@ def train(fs, gt, split=0.9):
 def main():
     paths, scores = load_scored(args.data_dir)
 
-    fs_path = os.path.join(SCRATCH_DIR, 'features.npy')
-    ss_path = os.path.join(SCRATCH_DIR, 'scores.npy')
+    fs_path = os.path.join(args.data_dir, 'features.npy')
+    ss_path = os.path.join(args.data_dir, 'scores.npy')
     if os.path.exists(fs_path) and args.pred:
         print("Loading features from", fs_path)
         fs = np.load(fs_path)
@@ -115,7 +113,7 @@ def main():
         paths, image_names = load_query(args.data_dir)
         fs = features.get_pred_features(paths)
         ss = model.predict(fs)
-        output_path = os.path.join(SCRATCH_DIR, 'pred.csv')
+        output_path = os.path.join(args.data_dir, 'pred.csv')
         save_submission(output_path, image_names, ss)
 
 

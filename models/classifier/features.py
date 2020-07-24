@@ -2,6 +2,7 @@ import numpy as np
 import imageio
 from tqdm import tqdm
 import os
+from skimage.feature import hog
 
 
 TILE_SIZE = 250
@@ -37,18 +38,29 @@ def get_pred_features(paths):
 
 
 def _features_for_img(img, scale_to_tile=False):
-    histogram = _pixel_histogram(img)
-    return histogram
+    hist1 = _pixel_histogram(img)
+    hist2 = _og_histogram(img)
 
-    num_stars = _num_stars(img)
-    if scale_to_tile:
-        num_stars /= NUM_TILES
+    return np.concatenate([hist1, hist2])
 
-    return np.concatenate([histogram, num_stars])
+    # num_stars = _num_stars(img)
+    # if scale_to_tile:
+    #     num_stars /= NUM_TILES
+    #
+    # return np.concatenate([histogram, num_stars])
 
 
 def _pixel_histogram(img):
     histogram, _ = np.histogram(img, bins=np.arange(256), density=True)
+
+    return histogram
+
+def _og_histogram(img):
+    histogram = hog(img,
+                    orientations=8,
+                    pixels_per_cell=(16, 16),
+                    cells_per_block=(1, 1),
+                    feature_vector=True)
 
     return histogram
 

@@ -6,10 +6,18 @@ import sklearn.metrics
 import features
 import pandas as pd
 import getpass
+import argparse
 
 USERNAME = getpass.getuser()
 SCRATCH_DIR = os.path.join('/cluster/scratch', USERNAME)
 DATA_DIR = os.path.join(SCRATCH_DIR, 'cosmology_aux_data_170429/cosmology_aux_data_170429/')
+
+parser = argparse.ArgumentParser(description='reg')
+parser.add_argument('--data_dir', type=str, default=DATA_DIR,
+                    help='Where the cosmology dataset resides')
+parser.add_argument('--pred', type=bool, default=False,
+                    help='Flag indicating whether to prepare a submission')
+args = parser.parse_args()
 
 
 def load_query(root_dir):
@@ -29,6 +37,8 @@ def load_scored(root_dir):
     idx = np.arange(data.shape[0])
     np.random.shuffle(idx)
     data = data[idx]
+
+    data = data[:40]
 
     names = data[:, 0]
     scores = data[:, 1]
@@ -53,39 +63,50 @@ def train(fs, gt, split=0.9):
     gt_test = gt[num_train_samples:]
 
     model = sklearn.ensemble.RandomForestRegressor(criterion='mae',
-                                                   oob_score=True)
-    model = sklearn.model_selection.GridSearchCV(model,
-                                                 {'n_estimators': [5, 10, 50, 100]},
-                                                 verbose=5,
-                                                 scoring='neg_mean_absolute_error',
-                                                 n_jobs=-1)
+                                                   oob_score=True,
+                                                   verbose=5,
+                                                   n_jobs=-1)
+    # model = sklearn.model_selection.GridSearchCV(model,
+    #                                              {'n_estimators': [5, 10, 50, 100]},
+    #                                              verbose=5,
+    #                                              scoring='neg_mean_absolute_error',
+    #                                              n_jobs=-1)
+
+
+
     model.fit(fs_train, gt_train)
 
-    pred = model.predict(fs_test)
-    mae = sklearn.metrics.mean_absolute_error(gt_test, pred)
-    print(mae)
+    if fs_test.shape[0] > 0:
+        pred = model.predict(fs_test)
+        mae = sklearn.metrics.mean_absolute_error(gt_test, pred)
+        print('VALIDATION MAE:', mae)
 
     return model
 
 
 def main():
-    paths, scores = load_scored(DATA_DIR)
+    paths, scores = load_scored(args.data_dir)
 
     fs_path = os.path.join(SCRATCH_DIR, 'features.npy')
-
-    if os.path.exists(fs_path):
+    ss_path = os.path.join(SCRATCH_DIR, 'scores.npy')
+    if os.path.exists(fs_path) and args.pred:
+        print("Loading features from", fs_path)
         fs = np.load(fs_path)
+        ss = np.load(ss_path)
     else:
-        fs = features.get_features(paths)
+        fs, ss = features.get_train_features(paths, scores)
         np.save(fs_path, fs)
+        np.save(ss_path, ss)
 
-    model = train(fs, scores)
+    split = 1 if args.pred else 0.8
+    model = train(fs, ss, split=split)
 
-    paths, image_names = load_query(DATA_DIR)
-    fs = features.get_features(paths)
-    scores = model.predict(fs)
-    output_path = os.path.join(SCRATCH_DIR, 'pred.csv')
-    save_submission(output_path, image_names, scores)
+    if args.pred:
+        paths, image_names = load_query(args.data_dir)
+        fs = features.get_pred_features(paths)
+        ss = model.predict(fs)
+        output_path = os.path.join(SCRATCH_DIR, 'pred.csv')
+        save_submission(output_path, image_names, ss)
 
 
 main()

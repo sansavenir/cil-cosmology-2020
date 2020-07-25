@@ -13,6 +13,12 @@ from dnnlib import EasyDict
 
 import config
 from metrics import metric_base
+import argparse
+
+parser = argparse.ArgumentParser(description='stylegan')
+parser.add_argument('--data_dir', type=str, default='/cluster/home/laurinb/data/cosmology512',
+                    help='Where the cosmology dataset resides')
+args = parser.parse_args()
 
 #----------------------------------------------------------------------------
 # Official training configs for StyleGAN, targeted mainly for FFHQ.
@@ -41,7 +47,7 @@ if 1:
     #desc += '-bedroom';  dataset = EasyDict(tfrecord_dir='lsun-bedroom-full');    train.mirror_augment = False
     #desc += '-car';      dataset = EasyDict(tfrecord_dir='lsun-car-512x384');     train.mirror_augment = False
     #desc += '-cat';      dataset = EasyDict(tfrecord_dir='lsun-cat-full');        train.mirror_augment = False
-    desc += '-cosmology512';      dataset = EasyDict(tfrecord_dir='/cluster/home/laurinb/data/cosmology512');        train.mirror_augment = False
+    desc += '-cosmology512';      dataset = EasyDict(tfrecord_dir=args.data_dir);        train.mirror_augment = False
     # desc += '-cosmology256';      dataset = EasyDict(tfrecord_dir='/cluster/home/laurinb/data/cosmology256');        train.mirror_augment = False
 
     # Number of GPUs.

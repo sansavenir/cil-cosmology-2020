@@ -2,7 +2,7 @@
 
 ## Plots
 
-All scripts used for plots as well as the relevant experiments can be found in `tools/inspect.ipynb`.
+The script for the histogram plot can be found in `tools/histograms.py`.
 
 ## Kaggle Competition
 

@@ -7,6 +7,7 @@ import features
 import pandas as pd
 import getpass
 import argparse
+import joblib
 
 USERNAME = getpass.getuser()
 SCRATCH_DIR = os.path.join('/cluster/scratch', USERNAME)
@@ -23,6 +24,8 @@ parser.add_argument('--pred', type=int, default=1,
                     help='Flag indicating whether to prepare a submission')
 parser.add_argument('--cached_features', type=int, default=0,
                     help='Flag indicating whether to use cached features')
+parser.add_argument('--cached_ckpt', type=int, default=0,
+                    help='Flag indicating whether to use cached ckpts')
 args = parser.parse_args()
 
 
@@ -112,8 +115,13 @@ def main():
         np.save(fs_path, fs)
         np.save(ss_path, ss)
 
-    split = 0.8 if args.val else 1
-    model = train(fs, ss, split=split)
+    ckpt_path = os.path.join(args.data_dir, 'ckpt.sav')
+    if args.cached_ckpt and os.path.exists(ckpt_path):
+      model = joblib.load(ckpt_path)
+    else:
+      split = 0.8 if args.val else 1
+      model = train(fs, ss, split=split)
+      joblib.dump(model, ckpt_path)
 
     if args.pred:
         paths, image_names = load_query(args.query_dir)
@@ -121,6 +129,8 @@ def main():
         ss = model.predict(fs)
         output_path = os.path.join(args.data_dir, 'pred.csv')
         save_submission(output_path, image_names, ss)
+
+        print('AVERAGE SCORE FOR', ss.shape[0], 'IMAGES:', np.mean(ss))
 
 
 main()

@@ -89,4 +89,4 @@ def _orb_features(img):
   extractor.detect_and_extract(img)
   fs = np.packbits(extractor.descriptors, axis=-1)
 
-  return np.reshape(fs, axis=0)
+  return np.reshape(fs, [-1])

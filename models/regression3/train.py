@@ -101,26 +101,26 @@ def train(fs, gt, split=0.9):
 
 
 def main():
-    paths, scores = load_scored(args.data_dir)
-
-    fs_path = os.path.join(args.data_dir, 'features.npy')
-    ss_path = os.path.join(args.data_dir, 'scores.npy')
-    if os.path.exists(fs_path) and args.cached_features:
-        print("Loading features from", fs_path)
-        fs = np.load(fs_path)
-        ss = np.load(ss_path)
-    else:
-        fs, ss = features.get_train_features(paths, scores)
-        np.save(fs_path, fs)
-        np.save(ss_path, ss)
-
     ckpt_path = os.path.join(args.data_dir, 'ckpt.sav')
     if args.cached_ckpt and os.path.exists(ckpt_path):
-      model = joblib.load(ckpt_path)
+        model = joblib.load(ckpt_path)
     else:
-      split = 0.8 if args.val else 1
-      model = train(fs, ss, split=split)
-      joblib.dump(model, ckpt_path)
+        paths, scores = load_scored(args.data_dir)
+
+        fs_path = os.path.join(args.data_dir, 'features.npy')
+        ss_path = os.path.join(args.data_dir, 'scores.npy')
+        if os.path.exists(fs_path) and args.cached_features:
+            print("Loading features from", fs_path)
+            fs = np.load(fs_path)
+            ss = np.load(ss_path)
+        else:
+            fs, ss = features.get_train_features(paths, scores)
+            np.save(fs_path, fs)
+            np.save(ss_path, ss)
+
+        split = 0.8 if args.val else 1
+        model = train(fs, ss, split=split)
+        joblib.dump(model, ckpt_path)
 
     if args.pred:
         paths, image_names = load_query(args.query_dir)
@@ -129,7 +129,11 @@ def main():
         output_path = os.path.join(args.data_dir, 'pred.csv')
         save_submission(output_path, image_names, ss)
 
-        print('AVERAGE SCORE FOR', ss.shape[0], 'IMAGES:', np.mean(ss))
+        mean = np.mean(ss)
+        min = np.amin(ss)
+        max = np.amax(ss)
+
+        print('AVERAGE SCORE FOR', ss.shape[0], 'IMAGES:', mean, 'ERR:', mean-min, max-mean)
 
 
 main()

@@ -8,10 +8,10 @@ from skimage.feature import ORB
 
 
 TILE_SIZE = 1000
-NUM_TILES = (1000/250)**2
+NUM_TILES = (1000/TILE_SIZE)**2
 MAX_NUM_STARS = 25
 FILTER_SIZE = 31
-extractor = ORB(n_keypoints=10)
+extractor = ORB(n_keypoints=5)
 
 
 def get_train_features(paths, scores):
@@ -44,15 +44,15 @@ def _features_for_img(img, path, scale_to_tile=False):
     px = _pixel_histogram(img)
     fft = _fft_histogram(img)
     # num_stars = _num_stars(path)
-    orb = _orb_features(img)
+    # orb = _orb_features(img)
 
-    fs = np.concatenate([px, fft, orb])
+    fs = np.concatenate([px, fft])
 
     return fs
 
 
 def _pixel_histogram(img):
-    histogram, _ = np.histogram(img, bins=np.arange(256), density=True)
+    histogram, _ = np.histogram(img, bins=np.arange(256))
 
     return histogram
 
@@ -79,7 +79,7 @@ def _fft_histogram(img):
 
 def _num_stars(path):
     img_name = os.path.splitext(os.path.basename(path))[0]
-    coords_path = os.path.join('../layered/coords', img_name+'.csv')
+    coords_path = os.path.join('../layered-statistical/coords', img_name+'.csv')
     coords = np.load(coords_path)
 
     return np.asaray([coords.shape[0]])

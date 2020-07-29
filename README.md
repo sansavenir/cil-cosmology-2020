@@ -41,10 +41,10 @@ python3 dataset_tool.py create_cosmology [OUTPUT_DIR] [DATA_DIR]
 python3 train --data_dir [OUTPUT_DIR]
 ```
 
-### Final Model
+### Layered Model
 
 ```
-cd models/isolate
+cd models/layered
 python3 prep_data --dataDir=[DATA_DIR]
 cd coord_gen
 python3 gan.py

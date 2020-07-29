@@ -79,7 +79,7 @@ def _fft_histogram(img):
 
 def _num_stars(path):
     img_name = os.path.splitext(os.path.basename(path))[0]
-    coords_path = os.path.join('../isolate/coords', img_name+'.csv')
+    coords_path = os.path.join('../layered/coords', img_name+'.csv')
     coords = np.load(coords_path)
 
     return np.asaray([coords.shape[0]])

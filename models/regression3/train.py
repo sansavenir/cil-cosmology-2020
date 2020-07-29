@@ -97,7 +97,6 @@ def train(fs, gt, split=0.9):
                 mae = sklearn.metrics.mean_absolute_error(gt_test[mask], pred[mask])
                 print('MAE of', count, 'samples in', l, '-', r, ': ', mae)
 
-
     return model
 
 

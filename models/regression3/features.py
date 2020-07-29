@@ -56,6 +56,7 @@ def _pixel_histogram(img):
 
     return histogram
 
+
 def _og_histogram(img):
     histogram = hog(img,
                     orientations=8,
@@ -73,7 +74,7 @@ def _fft_histogram(img):
     psd_fft_shift = np.abs(np.fft.fftshift(psd_fft))**2
     psd_log = 10 * np.log10(psd_fft_shift + eps)
 
-    return np.histogram(psd_log, bins=64, range=(0, 200))[0]
+    return np.histogram(psd_log, bins=32, range=(0, 200))[0]
 
 
 def _num_stars(path):

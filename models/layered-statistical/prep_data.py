@@ -17,19 +17,18 @@ parser.add_argument('--dataDir', type=str, default='/cluster/home/jkotal/cil-cos
 cfg = parser.parse_args()
 
 dataset = CSVDataset(cfg.dataDir,
-                     scored=True,
-                     labeled=False,
+                     scored=False,
+                     labeled=True,
                      transform=transforms.Compose([transforms.ToTensor()]))
 
 loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
 filter_size = 31
 
-# bg values
-xs = np.linspace(0, 255, 256)
-bs = np.zeros_like(xs)
-
 os.makedirs('coords', exist_ok=True)
 os.makedirs('stars', exist_ok=True)
+
+# we generate the background from one picture only to produce a representative random variable
+gen_background = True
 
 for data in tqdm(loader):
   if data['label'] == 0.:
@@ -61,11 +60,12 @@ for data in tqdm(loader):
 
   np.savetxt('coords/'+str(data['name'].item())+'.csv', np.argwhere(res>0), delimiter=",")
 
-  # update the background histogram
-  bs_img = np.asarray([np.count_nonzero(img == x) for x in xs])
-  bs += bs_img
+  if gen_background:
+    gen_background = False
+    # generate the background histogram
+    xs = np.linspace(0, 255, 256)
+    bs = np.asarray([np.count_nonzero(img == x) for x in xs])
 
-# average background values
-bs = bs/len(dataset)
-pk = bs/np.sum(bs)
-np.save('background.npy', pk)
+    # generate a random variable pk
+    pk = bs/np.sum(bs)
+    np.save('background.npy', pk)

@@ -4,6 +4,7 @@ import argparse
 import os
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import glob
 
 parser = argparse.ArgumentParser(description='histograms')
 parser.add_argument('--data_dir', type=str,
@@ -32,8 +33,7 @@ if args.real:
 
     paths = [os.path.join(args.data_dir, 'labeled', str(int(n)) + '.png') for n in labeled[:, 0]]
 else:
-    names = os.listdir(args.data_dir)
-    paths = [os.path.join(args.data_dir, n) for n in names][:500]
+    paths = glob.glob(os.path.join(args.data_dir, '*.png'))[:500]
 
 hists = [_hist(p) for p in tqdm(paths)]
 

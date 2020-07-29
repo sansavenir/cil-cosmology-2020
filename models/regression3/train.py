@@ -15,6 +15,8 @@ DATA_DIR = os.path.join(SCRATCH_DIR, 'cosmology_aux_data_170429/cosmology_aux_da
 parser = argparse.ArgumentParser(description='reg')
 parser.add_argument('--data_dir', type=str, default=DATA_DIR,
                     help='Where the cosmology dataset resides')
+parser.add_argument('--query_dir', type=str, default=os.path.join(DATA_DIR, 'query'),
+                    help='Where the query folder resides')
 parser.add_argument('--val', type=int, default=1,
                     help='Flag indicating whether to validate')
 parser.add_argument('--pred', type=int, default=1,
@@ -24,8 +26,7 @@ parser.add_argument('--cached_features', type=int, default=0,
 args = parser.parse_args()
 
 
-def load_query(root_dir):
-    query_path = os.path.join(root_dir, 'query')
+def load_query(query_path):
     image_names = os.listdir(query_path)
     image_names = np.asarray([os.path.splitext(n)[0] for n in image_names])
 
@@ -115,7 +116,7 @@ def main():
     model = train(fs, ss, split=split)
 
     if args.pred:
-        paths, image_names = load_query(args.data_dir)
+        paths, image_names = load_query(args.query_dir)
         fs = features.get_pred_features(paths)
         ss = model.predict(fs)
         output_path = os.path.join(args.data_dir, 'pred.csv')

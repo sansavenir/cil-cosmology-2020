@@ -44,9 +44,9 @@ def _features_for_img(img, path, scale_to_tile=False):
     px = _pixel_histogram(img)
     fft = _fft_histogram(img)
     # num_stars = _num_stars(path)
-    # orb = _orb_features(img)
+    orb = _orb_features(img)
 
-    fs = np.concatenate([px, fft])
+    fs = np.concatenate([px, fft, orb])
 
     return fs
 
@@ -73,7 +73,7 @@ def _fft_histogram(img):
     psd_fft_shift = np.abs(np.fft.fftshift(psd_fft))**2
     psd_log = 10 * np.log10(psd_fft_shift + eps)
 
-    return np.histogram(psd_log, bins=32, range=(0, 200))[0]
+    return np.histogram(psd_log, bins=64, range=(0, 200))[0]
 
 
 def _num_stars(path):

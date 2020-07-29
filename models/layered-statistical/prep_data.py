@@ -14,6 +14,8 @@ import argparse
 parser = argparse.ArgumentParser(description='reg')
 parser.add_argument('--dataDir', type=str, default='/cluster/home/jkotal/cil-cosmology-2020/data/',
                     help='Flag indicating whether CUDA should be used')
+parser.add_argument('--num_bg_imgs', type=int, default=10,
+                    help='Number of images to be taken into account for the background random variable')
 cfg = parser.parse_args()
 
 dataset = CSVDataset(cfg.dataDir,
@@ -27,8 +29,10 @@ filter_size = 31
 os.makedirs('coords', exist_ok=True)
 os.makedirs('stars', exist_ok=True)
 
-# we generate the background from one picture only to produce a representative random variable
-gen_background = True
+# we generate the background from n pictures to produce a representative random variable
+num_bg_imgs = cfg.num_bg_imgs
+xs = np.linspace(0, 255, 256)
+bs = np.zeros_like(xs)
 
 for data in tqdm(loader):
   if data['label'] == 0.:
@@ -60,12 +64,14 @@ for data in tqdm(loader):
 
   np.savetxt('coords/'+str(data['name'].item())+'.csv', np.argwhere(res>0), delimiter=",")
 
-  if gen_background:
-    gen_background = False
-    # generate the background histogram
-    xs = np.linspace(0, 255, 256)
-    bs = np.asarray([np.count_nonzero(img == x) for x in xs])
+  if num_bg_imgs > 0:
+    # update the background histogram
+    bs += np.asarray([np.count_nonzero(img == x) for x in xs])
+    num_bg_imgs -= 1
+  else:
+    break
 
-    # generate a random variable pk
-    pk = bs/np.sum(bs)
-    np.save('background.npy', pk)
+# average background values
+bs = bs / num_bg_imgs
+pk = bs / np.sum(bs)
+np.save('background.npy', pk)

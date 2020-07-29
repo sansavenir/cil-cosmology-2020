@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description='histograms')
 parser.add_argument('--data_dir', type=str,
                     help='Path to the image directory')
-parser.add_argument('--scored', type=bool, default=False,
-                    help='Flag whether its scored images or not')
+parser.add_argument('--real', type=int, default=0,
+                    help='Flag whether its real images or not')
 args = parser.parse_args()
 
 def _hist(path):
@@ -22,15 +22,15 @@ def _hist(path):
     histogram, _ = np.histogram(img, bins=np.arange(256))
     return histogram
 
-if args.scored:
-    scored_path = os.path.join(args.data_dir, 'scored.csv')
-    scored = np.genfromtxt(scored_path, delimiter=',', skip_header=1, dtype=np.float32)
+if args.real:
+    labeled_path = os.path.join(args.data_dir, 'labeled.csv')
+    labeled = np.genfromtxt(labeled_path, delimiter=',', skip_header=1, dtype=np.float32)
 
-    mask = scored[:, 1] > 3
-    scored = scored[mask]
-    scored = scored[:500]
+    mask = labeled[:, 1] > 0
+    labeled = labeled[mask]
+    labeled = labeled[:500]
 
-    paths = [os.path.join(args.data_dir, 'scored', str(int(n)) + '.png') for n in scored[:, 0]]
+    paths = [os.path.join(args.data_dir, 'labeled', str(int(n)) + '.png') for n in labeled[:, 0]]
 else:
     names = os.listdir(args.data_dir)
     paths = [os.path.join(args.data_dir, n) for n in names][:500]

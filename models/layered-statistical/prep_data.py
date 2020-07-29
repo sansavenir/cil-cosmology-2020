@@ -14,7 +14,7 @@ import argparse
 parser = argparse.ArgumentParser(description='reg')
 parser.add_argument('--dataDir', type=str, default='/cluster/home/jkotal/cil-cosmology-2020/data/',
                     help='Flag indicating whether CUDA should be used')
-parser.add_argument('--num_bg_imgs', type=int, default=10,
+parser.add_argument('--num_bg_imgs', type=int, default=1,
                     help='Number of images to be taken into account for the background random variable')
 cfg = parser.parse_args()
 

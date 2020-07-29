@@ -14,7 +14,7 @@ import argparse
 parser = argparse.ArgumentParser(description='reg')
 parser.add_argument('--coordModel', type=str, default='coord_gen/generator.pt',
                     help='Flag indicating whether CUDA should be used')
-parser.add_argument('--starModel', type=str, default='image_gen/models/46_generator.pt',
+parser.add_argument('--starModel', type=str, default='image_gen/models/300_generator.pt',
                     help='Flag indicating whether CUDA should be used')
 cfg = parser.parse_args()
 

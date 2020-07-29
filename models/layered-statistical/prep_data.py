@@ -38,16 +38,18 @@ for data in tqdm(loader):
   if data['label'] == 0.:
     continue
   img = (data['image'].data.numpy()[0,0]*255.).astype(np.uint8)
+  # Make filter that maximises values at its center
   res = np.zeros(img.shape)
   mult = np.identity(filter_size)
   nums = np.concatenate((list(range(filter_size//2)), list(range(filter_size//2,-1,-1))))
   mult *= nums
+  # Compute filter value for each pixel
   for i in range(img.shape[0]-filter_size):
     for j in range(img.shape[0]-filter_size):
       res[i,j] = np.sum(img[i:i+filter_size,j:j+filter_size]*mult)
-
+  # remove values that are too small
   res = np.where(res > 1000, res, 0)
-
+  # Make sure we don't take multiple patches of the same star
   for i in range(0,img.shape[0],10):
     for j in range(0,img.shape[0],10):
       arg = np.unravel_index(np.argmax(res[i:i+filter_size,j:j+filter_size]), res[i:i+filter_size,j:j+filter_size].shape)

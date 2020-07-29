@@ -72,6 +72,6 @@ for data in tqdm(loader):
     break
 
 # average background values
-bs = bs / num_bg_imgs
+bs = bs / cfg.num_bg_imgs
 pk = bs / np.sum(bs)
 np.save('background.npy', pk)

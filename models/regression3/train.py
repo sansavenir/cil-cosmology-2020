@@ -15,11 +15,11 @@ DATA_DIR = os.path.join(SCRATCH_DIR, 'cosmology_aux_data_170429/cosmology_aux_da
 parser = argparse.ArgumentParser(description='reg')
 parser.add_argument('--data_dir', type=str, default=DATA_DIR,
                     help='Where the cosmology dataset resides')
-parser.add_argument('--val', type=bool, default=True,
+parser.add_argument('--val', type=int, default=1,
                     help='Flag indicating whether to validate')
-parser.add_argument('--pred', type=bool, default=True,
+parser.add_argument('--pred', type=int, default=1,
                     help='Flag indicating whether to prepare a submission')
-parser.add_argument('--cached_features', type=bool, default=False,
+parser.add_argument('--cached_features', type=int, default=0,
                     help='Flag indicating whether to use cached features')
 args = parser.parse_args()
 
@@ -70,7 +70,7 @@ def train(fs, gt, split=0.9):
                                                    verbose=5,
                                                    n_jobs=-1)
     # model = sklearn.model_selection.GridSearchCV(model,
-    #                                              {'n_estimators': [5, 10, 50, 100]},
+    #                                              {'n_estimators': [80, 85, 90, 95, 100, 105, 110]},
     #                                              verbose=5,
     #                                              scoring='neg_mean_absolute_error',
     #                                              n_jobs=-1)
@@ -118,7 +118,7 @@ def main():
         paths, image_names = load_query(args.data_dir)
         fs = features.get_pred_features(paths)
         ss = model.predict(fs)
-        output_path = os.path.join(args.data_dir, 'pred3.csv')
+        output_path = os.path.join(args.data_dir, 'pred.csv')
         save_submission(output_path, image_names, ss)
 
 

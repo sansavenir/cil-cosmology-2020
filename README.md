@@ -2,7 +2,7 @@
 
 ## Plots
 
-The script for the histogram plot can be found in `tools/histograms.py`.
+The script for the histogram plot can be found in `tools/histograms.py`, the one to compare model scores in `tools/score-comp.py`
 
 ## Kaggle Competition
 

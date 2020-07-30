@@ -72,13 +72,17 @@ for epoch in tqdm(range(num_epochs)):
         b_size = real_cpu.size(0)
         label = torch.full((b_size,), true_label, device=device)
         output = netD(real_cpu).view(-1)
+
+        # compute loss for discriminator for real coordinates and backpropagate
         errD_real = criterion(output, label)
         errD_real.backward()
         D_x = output.mean().item()
 
+        # generate fake coordinates
         noise = torch.randn(b_size, nz, device=device)
         fake = netG(noise)
         label.fill_(fake_label)
+        # compute loss for discriminator for fake coordinates and backpropagate
         output = netD(fake.detach()).view(-1)
         errD_fake = criterion(output, label)
         errD_fake.backward()
@@ -86,6 +90,7 @@ for epoch in tqdm(range(num_epochs)):
         errD = errD_real + errD_fake
         optimizerD.step()
 
+        # compute loss for generator and backpropagate
         netG.zero_grad()
         label.fill_(true_label)  # fake labels are real for generator cost
         output = netD(fake).view(-1)

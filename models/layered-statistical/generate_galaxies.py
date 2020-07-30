@@ -41,7 +41,7 @@ for i in tqdm(range(5000)):
   res = bg_rv.ppf(res).astype(np.uint8)
 
   # generate the coordinates of the stars
-  coords = (cg(torch.randn(1, 10).to(device)).detach().cpu().data.numpy().reshape([25, 2])*1000).astype(int)
+  coords = (cg(torch.randn(1, 10).to(device)).detach().cpu().data.numpy().reshape([25, 2])*970).astype(int)
 
   for c in coords:
     if c[0]< 0 or c[1] < 0:

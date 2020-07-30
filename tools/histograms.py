@@ -14,7 +14,7 @@ parser.add_argument('--real', type=int, default=0,
 args = parser.parse_args()
 
 def _hist(path):
-    img = imageio.imread(path)
+    img = imageio.imread(path)[:1000, :1000]
 
     if img.dtype == np.float32:
         assert(np.amax(img) <= 1)
@@ -41,12 +41,15 @@ hists = np.stack(hists)
 hist = np.mean(hists, axis=0)
 
 fig = plt.figure()
-plt.xlabel('brightness')
-plt.ylabel('average number of pixels')
+plt.tick_params(axis='both', which='major', labelsize=14)
+plt.tick_params(axis='both', which='minor', bottom=False, left=False)
+plt.xlabel('brightness', fontsize=18)
+plt.ylabel('average number of pixels', fontsize=18)
 plt.yscale('log')
 plt.ylim(top=10**6)
 plt.ylim(bottom=0.1)
 
 bins = list(range(255))
 plt.bar(bins, hist, width=1)
+plt.tight_layout()
 plt.show()

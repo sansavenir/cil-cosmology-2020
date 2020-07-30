@@ -22,10 +22,10 @@ class CSVDataset(Dataset):
         """
         self.label_frame = None
         if scored:
-            self.label_frame = pd.read_csv(root_dir+'/scored.csv')
+            self.label_frame = pd.read_csv(os.path.join(root_dir, 'scored.csv'))
             self.label_frame['dir'] = ['scored']*self.label_frame.shape[0]
         if labeled:
-            lb_frame = pd.read_csv(root_dir+'/labeled.csv')
+            lb_frame = pd.read_csv(os.path.join(root_dir, 'labeled.csv'))
             lb_frame['dir'] = ['labeled']*lb_frame.shape[0]
             self.label_frame = self.label_frame.append(lb_frame) if self.label_frame is not None else lb_frame
         self.transform = transform

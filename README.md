@@ -47,7 +47,7 @@ python3 train.py --data_dir [OUTPUT_DIR]
 ```
 cd models/layered-statistical
 pip3 install torch torchvision
-python3 prep_data.py --dataDir=[DATA_DIR]
+PYTHONPATH=../../ python3 prep_data.py --dataDir=[DATA_DIR]
 cd coord_gen
 python3 gan.py
 cd ../image_gen

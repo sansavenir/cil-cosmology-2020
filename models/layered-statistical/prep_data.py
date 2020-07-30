@@ -1,5 +1,3 @@
-import sys
-sys.path.append('../../')
 from tools.dataset import CSVDataset
 from torchvision import datasets, transforms
 import torch

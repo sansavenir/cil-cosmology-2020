@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 fig = plt.figure()
-plt.ylabel('average score')
+plt.ylabel('average score', fontsize=18)
 plt.ylim(top=6)
 plt.ylim(bottom=0)
 
@@ -14,6 +14,8 @@ errors = [[0.2565912032318418, 1.3654140043492544],
           [1.6416210477554136, 2.1324531635916197]]
 errors = np.asarray(errors).T
 
+plt.tick_params(axis='both', which='major', labelsize=14)
+plt.tick_params(axis='both', which='minor', bottom=False, left=False)
 plt.bar(models, scores, yerr=errors, capsize=3)
 
 for i, v in enumerate(scores):

@@ -45,7 +45,7 @@ python3 train --data_dir [OUTPUT_DIR]
 
 ```
 cd models/layered-statistical
-python3 prep_data --dataDir=[DATA_DIR]
+python3 prep_data.py --dataDir=[DATA_DIR]
 cd coord_gen
 python3 gan.py
 cd ../image_gen

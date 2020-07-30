@@ -37,15 +37,17 @@ label_csv = pd.read_csv("cil-cosmology-2020/labeled.csv")
 
 ```
 cd models/stylegan1
+pip3 install tensorflow-gpu==1.15 
 python3 dataset_tool.py create_cosmology [OUTPUT_DIR] [DATA_DIR]
-python3 train --data_dir [OUTPUT_DIR]
+python3 train.py --data_dir [OUTPUT_DIR]
 ```
 
 ### Layered Model
 
 ```
 cd models/layered-statistical
-python3 prep_data --dataDir=[DATA_DIR]
+pip3 install torch torchvision
+python3 prep_data.py --dataDir=[DATA_DIR]
 cd coord_gen
 python3 gan.py
 cd ../image_gen

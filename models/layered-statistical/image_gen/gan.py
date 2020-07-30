@@ -12,6 +12,7 @@ from dataset import CSVDataset
 from PIL import Image
 from tqdm import tqdm
 import os
+from time import time
 
 nz = 100
 
@@ -25,7 +26,7 @@ os.makedirs('models', exist_ok=True)
 os.makedirs('results', exist_ok=True)
 
 batch_size = 64
-num_epochs = 50
+num_epochs = 101
 
 dataset = CSVDataset('../stars/',
                            transform=transforms.Compose([
@@ -34,7 +35,7 @@ dataset = CSVDataset('../stars/',
                            ]))
 
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
-                                         shuffle=True, num_workers=workers)
+                                         shuffle=True, num_workers=1)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -66,6 +67,7 @@ true_label = 1.
 
 iters = 0
 print("Starting Training Loop...")
+start = time()
 # For each epoch
 for epoch in (range(num_epochs)):
     # For each batch in the dataloader
@@ -75,15 +77,18 @@ for epoch in (range(num_epochs)):
         b_size = real_cpu.size(0)
         D_real = netD(real_cpu).view(-1)
 
+        # compute loss of discriminator and backpropagate
         noise = torch.randn(b_size, nz, 1, 1, device=device)
         fake = netG(noise)
         D_fake = netD(fake.detach()).view(-1)
         D_loss = -(torch.mean(D_real) - torch.mean(D_fake))
         D_loss.backward()
         optimizerD.step()
+        # clamp gradients
         for p in netD.parameters():
             p.data.clamp_(-0.01, 0.01)
 
+        # compute loss of generator and backpropagate
         netG.zero_grad()
         D_fake = netD(fake).view(-1)
         G_loss = -torch.mean(D_fake)
@@ -101,6 +106,8 @@ for epoch in (range(num_epochs)):
             (Image.fromarray(np.uint8((random[0,0]+1)*127.5))).save('results/'+str(iters)+'_random'+'.png')
 
         iters += 1
-    torch.save(netG.state_dict(), 'models/' + str(epoch) + '_generator.pt')
+    if epoch % 20 == 0:
+        torch.save(netG.state_dict(), 'models/' + str(epoch) + '_generator.pt')
+    print('time elapsed ', time()-start)
 
 

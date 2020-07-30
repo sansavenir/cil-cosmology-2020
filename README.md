@@ -39,7 +39,7 @@ label_csv = pd.read_csv("cil-cosmology-2020/labeled.csv")
 cd models/stylegan1
 pip3 install tensorflow-gpu==1.15 
 python3 dataset_tool.py create_cosmology [OUTPUT_DIR] [DATA_DIR]
-python3 train --data_dir [OUTPUT_DIR]
+python3 train.py --data_dir [OUTPUT_DIR]
 ```
 
 ### Layered Model
